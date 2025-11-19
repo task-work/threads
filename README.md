@@ -1,14 +1,11 @@
-## 基本信息
-### NextJs
+## base information
+### NextJs 16.x
 ### nvm use 21
-### npx create-next-app@latest ./   当前目录创建项目
+### npx create-next-app@latest ./   create project Directory
 
-### 依赖
-    1. @clerk/nextjs                                            身份验证（多平台[google、github等]）, https://clerk.com/
-    2. @uploadthing/react   uploadthing                         文件上传（头像）    https://uploadthing.com/
-    3. mongoose                                                 mongoDB          https://mongodb.com
+### Dependencies
+    1. @clerk/nextjs                                            https://clerk.com/
+    2. @uploadthing/react   uploadthing                         https://uploadthing.com/
+    3. mongoose                                                 https://mongodb.com
+    4. shadcn-ui                                                https://ui.shadcn.com/
 
-### 路由
-    1. 路由分组
-       1. (name) 在路径中隐藏name
-1. 
