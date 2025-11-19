@@ -8,4 +8,5 @@
     2. @uploadthing/react   uploadthing                         https://uploadthing.com/
     3. mongoose                                                 https://mongodb.com
     4. shadcn-ui                                                https://ui.shadcn.com/
+    5. tailwind css 4.x                                         https://tailwindcss.com/
 
