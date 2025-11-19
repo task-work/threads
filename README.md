@@ -25,7 +25,7 @@
         NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/onboarding
         NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 ### deploy
-    1. Location: vercel.com
-    2. visit the domain name: [https://thread.hmopen.com/](https://thread.hmopen.com/)
+#### 1. Location: vercel.com
+#### 2. visit the domain name: [https://thread.hmopen.com/](https://thread.hmopen.com/)
 
 
