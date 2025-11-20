@@ -1,26 +1,32 @@
 
 import UserCard from "@/components/cards/UserCard";
-import ProfileHeader from "@/components/shared/ProfileHeader";
-import { profileTabs } from "@/constants";
-import { fetchUser, fetchUserPosts, fetchUsers } from "@/lib/actions/user.actions";
+import Pagination from "@/components/shared/Pagination";
+import Searchbar from "@/components/shared/Searchbar";
+import { fetchUser, fetchUsers } from "@/lib/actions/user.actions";
 import { currentUser } from "@clerk/nextjs/server";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
-const Page = async () => {
+const Page = async ({searchParams} : {searchParams: {[key: string]: string | undefined}}) => {
     const user = await currentUser();
     if(!user) return null;
+
     const userInfo = await fetchUser(user.id);
-    
     if(!userInfo?.onboarded) redirect('/onboarding');
 
-    const result = await fetchUsers({userId: user.id, searchString: '', pageNumber: 1, pageSize: 25});
+    const params = await searchParams;
+
+    const result = await fetchUsers({
+        userId: user.id, 
+        searchString: params.q, 
+        pageNumber: params?.page ? +params.page : 1, 
+        pageSize: 25
+    });
 
     return (
         <section>
             <h1 className="head-text mb-10">Search</h1>
 
-            {/* search bar */}
+            <Searchbar routeType='search' />
 
             <div className="mt-14 flex flex-col gap-9">
                 {
@@ -44,6 +50,12 @@ const Page = async () => {
                     )
                 }
             </div>
+
+            <Pagination
+                path='search'
+                pageNumber={params?.page ? +params.page : 1}
+                isNext={result.isNext}
+            />
         </section>
     )
 }

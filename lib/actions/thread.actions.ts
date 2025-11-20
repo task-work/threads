@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server"
 
 import { revalidatePath } from "next/cache";
@@ -5,6 +6,7 @@ import Thread from "../models/thread.models";
 import User from "../models/user.models";
 import { connectToDB } from "../mongoose";
 import { text } from "stream/consumers";
+import Community from "../models/community.models";
 
 interface Params {
     text: string,
@@ -28,18 +30,21 @@ export async function createThread({text, author, communityId, path}: Params) {
         const user = await User.findOne({ id: author });                    // 业务 ID
         if (!user) throw new Error("User not found");
 
+        const communityIdObject = await Community.findOne({id: communityId}, {_id: 1});
         const createThread = await Thread.create({
             text,
             author: user._id,
-            community: null
+            community: communityIdObject
         });
 
         //推送给创建帖子的用户（该推送非网络消息推送，而是把创建的帖子推送至作者本人的模型(User中的 thread 字段), 即所有用户都拥有自己发布的帖子）
         await User.findByIdAndUpdate(user._id, {$push: {threads: createThread._id}});
 
+        if(communityIdObject) {
+            //update community model
+            await Community.findByIdAndUpdate(communityIdObject, {$push: {threads: createThread._id}});
+        }
         revalidatePath(path);
-
-        
     }
     catch(error: unknown) {
         if(error instanceof Error) {
@@ -64,6 +69,7 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
         .skip(skipAmount)
         .limit(pageSize)
         .populate({path: 'author', model: User})                        //附加作者信息
+        .populate({path: 'community', model: Community})                //社区信息
         .populate({                                                     //附加评论信息    
             path: 'children',
             populate: {                                                 //附加评论的作者信息
@@ -164,5 +170,72 @@ export async function addCommentToThread(threadId: string, commenText: string, u
             throw new Error(`add comment is error, ${error.message}`);
         }
         throw new Error("add comment is error");
+    }
+}
+
+export async function fetchAllChildThreads(threadId: string): Promise<any[]> {
+    const childThreads = await Thread.find({ parentId: threadId });
+    const descendantThreads = await Promise.all(
+        childThreads.map((child) => fetchAllChildThreads(child._id.toString()))
+    )
+    const descendants = descendantThreads.flat();
+    return [...childThreads, ...descendants];
+}
+
+
+//删除帖子
+export async function deleteThread(id: string, path: string): Promise<void> {
+    try {
+        connectToDB();
+        const mainThread = await Thread.findById(id).populate("author community");
+        if (!mainThread) {
+            throw new Error("Thread not found");
+        }
+
+        // Fetch all child threads and their descendants recursively
+        const descendantThreads = await fetchAllChildThreads(id);
+
+        // Get all descendant thread IDs including the main thread ID and child thread IDs
+        const descendantThreadIds = [
+            id,
+            ...descendantThreads.map((thread) => thread._id),
+        ];
+
+        // Extract the authorIds and communityIds to update User and Community models respectively
+        const uniqueAuthorIds = new Set(
+        [
+            ...descendantThreads.map((thread) => thread.author?._id?.toString()), // Use optional chaining to handle possible undefined values
+            mainThread.author?._id?.toString(),
+        ].filter((id) => id !== undefined)
+        );
+
+        const uniqueCommunityIds = new Set(
+        [
+            ...descendantThreads.map((thread) => thread.community?._id?.toString()), // Use optional chaining to handle possible undefined values
+            mainThread.community?._id?.toString(),
+        ].filter((id) => id !== undefined)
+        );
+
+        // Recursively delete child threads and their descendants
+        await Thread.deleteMany({ _id: { $in: descendantThreadIds } });
+
+        // Update User model
+        await User.updateMany(
+            { _id: { $in: Array.from(uniqueAuthorIds) } },
+            { $pull: { threads: { $in: descendantThreadIds } } }
+        );
+
+        // Update Community model
+        await Community.updateMany(
+            { _id: { $in: Array.from(uniqueCommunityIds) } },
+            { $pull: { threads: { $in: descendantThreadIds } } }
+        );
+        revalidatePath(path);
+
+    } catch (error) {
+        if(error instanceof Error) {
+            throw new Error(`delete thread is error, ${error.message}`);
+        }
+        throw new Error("failed to delete thread");
     }
 }

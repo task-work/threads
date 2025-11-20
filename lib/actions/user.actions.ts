@@ -5,6 +5,7 @@ import User from "../models/user.models";
 import { connectToDB } from "../mongoose";
 import { FilterQuery, SortOrder } from "mongoose";
 import Thread from "../models/thread.models";
+import Community from "../models/community.models";
 
 interface Params {
     userId: string,
@@ -53,7 +54,10 @@ export async function updateUser({
 export async function fetchUserById(userId: string) {
     try {
         connectToDB();
-        return await User.findOne({id: userId});
+        return await User.findOne({id: userId}).populate({
+            path: 'communities',
+            model: Community
+        });
     }
     catch(error: unknown) {
         if (error instanceof Error) {
@@ -66,7 +70,10 @@ export async function fetchUserById(userId: string) {
 export async function fetchUser(id: string) {
     try {
         connectToDB();
-        return await User.findOne({id});
+        return await User.findOne({id}).populate({
+            path: 'communities',
+            model: Community
+        });
     }
     catch(error: unknown) {
         if (error instanceof Error) {
@@ -86,15 +93,22 @@ export async function fetchUserPosts(userId: string) {
         const threads = await User.findOne({id: userId}).populate({
             path: 'threads',
             model: 'Thread',
-            populate: {
-                path: 'children',
-                model: 'Thread',
-                populate: {
-                    path: 'author',
-                    model: 'User',
-                    select: "name image id"
+            populate: [
+                {
+                    path: 'community',
+                    model: Community,
+                    select: 'name id image _id'
+                },
+                {
+                    path: 'children',
+                    model: 'Thread',
+                    populate: {
+                        path: 'author',
+                        model: 'User',
+                        select: "name image id"
+                    }
                 }
-            }
+            ]
         })
         return threads;
     }
