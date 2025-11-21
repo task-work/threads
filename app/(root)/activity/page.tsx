@@ -1,6 +1,6 @@
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { fetchUser, getActivity } from "@/lib/actions/user.actions";
 import { currentUser } from "@clerk/nextjs/server";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -25,7 +25,9 @@ const Page = async () => {
                                     activity.map((activity) => (
                                         <Link key={activity._id} href={`/thread/${activity.parentId}`}>
                                             <article className="activity-card">
-                                                <Image src={activity.author.image} alt="Profile Image" width={20} height={20} className="rounded-full object-contain" />
+                                                <Avatar className="w-4 h-4">
+                                                    <AvatarImage src={activity.author.image} alt="Profile Image" />
+                                                </Avatar>
                                                 <p className="text-small-regular text-light-1">
                                                     <span className="mr-1 text-primary-500">{activity.author.name}</span>
                                                     {" "}

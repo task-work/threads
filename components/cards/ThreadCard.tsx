@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-key */
+//* eslint-disable react/jsx-key */
 import Link from "next/link";
 import Image from "next/image";
 import { formatDateString } from "@/lib/utils";
@@ -49,7 +49,6 @@ const ThreadCard = ({
                             <Avatar className="w-11 h-11 cursor-pointer bg-gray-50">
                                 <AvatarImage src={author.image} alt="Profile image" />
                             </Avatar>
-                            {/* <Image src={author.image} alt="Profile image" fill className="cursor-pointer object-cover" /> */}
                         </Link>
 
                         <div className="thread-card_bar" /> 
@@ -75,7 +74,7 @@ const ThreadCard = ({
                                 <div className="flex gap-3.5">
                                     <Image src="/assets/heart-gray.svg" alt="heart" title="heart" width={24} height={24} className="cursor-pointer object-contain" />
                                     <Link href={`/thread/${id}`}>
-                                        <Image src="/assets/reply.svg" alt="reply" title="reply" width={24} height={24} className="cursor-pointer object-contain" />
+                                        <Image src="/assets/reply.svg" alt="reply" title="reply" width={24} height={24} className="cursor-pointer object-contain hover:scale-120" />
                                     </Link>
                                     <Image src="/assets/repost.svg" alt="repost" title="repost" width={24} height={24} className="cursor-pointer object-contain" />
                                     <Image src="/assets/share.svg" alt="share" title="share" width={24} height={24} className="cursor-pointer object-contain" />
