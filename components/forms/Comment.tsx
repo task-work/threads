@@ -14,8 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import Image from 'next/image';
 import { addCommentToThread } from '@/lib/actions/thread.actions';
+import { Avatar, AvatarImage } from '../ui/avatar';
 
 interface Props {
     threadId: string;
@@ -48,7 +48,9 @@ const Comment = ({threadId, currentUserImg, currentUserId}: Props) => {
                     render={({ field }) => (
                         <FormItem className='flex w-full items-center gap-3'>
                             <FormLabel>
-                               <Image src={currentUserImg} alt='Profile image' width={48} height={48} className='rounded-full object-cover' />
+                                <Avatar className='backdrop-contrast-50 w-12 h-12'>
+                                    <AvatarImage src={currentUserImg} alt='Profile image' />
+                                </Avatar>
                             </FormLabel>
                             <FormControl className='border-none bg-transparent'>
                                 <Input type="text" placeholder='Commnet...' className='not-focus text-light-1 outline-none' {...field} />

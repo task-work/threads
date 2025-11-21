@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { isBase64Image } from '@/lib/utils';
 import { updateUser } from '@/lib/actions/user.actions';
 import { usePathname, useRouter } from 'next/navigation';
+import { Avatar, AvatarImage } from '../ui/avatar';
 
 interface Props {
     user: {
@@ -40,7 +41,6 @@ const AccountProfile = ({user, btnTitle} : Props) => {
     const { startUpload } = useUploadThing("media");
     const router = useRouter();
     const pathname = usePathname();
-
 
     const form = useForm<z.infer<typeof UserValidation>>({
         resolver: zodResolver(UserValidation),
@@ -73,8 +73,12 @@ const AccountProfile = ({user, btnTitle} : Props) => {
      *  **/
     const onSubmit = async (values: z.infer<typeof UserValidation>) => {
         const blob = values.profile_photo;
+
+        console.log("onSubmit", blob);
+        console.log("user", user.image);
+
         const hasImageChanged = isBase64Image(blob);
-        if(hasImageChanged) {
+        if(files.length > 0 && hasImageChanged) {
             const imgRes = await startUpload(files);
             if(imgRes && imgRes[0].ufsUrl) {
                 values.profile_photo = imgRes[0].ufsUrl;
@@ -97,8 +101,6 @@ const AccountProfile = ({user, btnTitle} : Props) => {
         else {
             router.push('/');           //去主页
         }
-
-        console.log("values", values)
     }
 
 
@@ -111,7 +113,11 @@ const AccountProfile = ({user, btnTitle} : Props) => {
                             <FormLabel className='account-form_image-label'>
                                 {
                                     field.value 
-                                    ? (<Image src={field.value} alt="profile photo" width={96} height={96} property='true' className='rounded-full object-contain' />)
+                                    ? (
+                                        <Avatar className='w-20 h-20'>
+                                            <AvatarImage src={field.value} alt="profile photo" property='true' />
+                                        </Avatar>
+                                    )
                                     : (<Image src="/assets/profile.svg" alt="profile photo" width={24} height={24} className='object-contain' />)
                                 }
                             </FormLabel>
@@ -164,7 +170,7 @@ const AccountProfile = ({user, btnTitle} : Props) => {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className='bg-primary-500'>Submit</Button>
+                <Button type="submit" className='bg-primary-500 hover:bg-gray-1 cursor-pointer'>Submit</Button>
             </form>
         </Form>
     );

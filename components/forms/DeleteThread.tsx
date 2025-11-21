@@ -14,9 +14,7 @@ interface Props {
 const DeleteThread = ({threadId, currentUserId, authorId, parentId, isComment}: Props) => {
     const pathname = usePathname();
     const router = useRouter();
-    console.log("currentUserId", currentUserId);
-    console.log("authorId", authorId);
-    console.log("result", currentUserId === authorId);
+    //首页不展示删除按钮
     if (currentUserId !== authorId || pathname === "/") return null;
 
     return (

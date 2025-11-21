@@ -78,7 +78,7 @@ export const POST = async (request: Request) => {
             name: name,
             // @ts-expect-error - value may not be string
             username: slug,
-            bio: 'org bio',
+            bio: `... ${name}`,
             // @ts-expect-error - value may not be string
             image: logo_url || image_url,
             // @ts-expect-error - value may not be string
