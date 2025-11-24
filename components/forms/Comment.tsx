@@ -1,6 +1,7 @@
 "use client"
 
 import * as z from 'zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CommentValidation } from '@/lib/validations/thread';
@@ -12,11 +13,11 @@ import {
   FormLabel
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from 'next/navigation';
+import { Spinner } from '@/components/ui/spinner';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import { usePathname } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { addCommentToThread } from '@/lib/actions/thread.actions';
-import { Avatar, AvatarImage } from '../ui/avatar';
-
 interface Props {
     threadId: string;
     currentUserImg: string;
@@ -24,8 +25,6 @@ interface Props {
 }
 
 const Comment = ({threadId, currentUserImg, currentUserId}: Props) => {
-
-    const router = useRouter();
     const pathname = usePathname();
 
     const form = useForm({
@@ -34,10 +33,11 @@ const Comment = ({threadId, currentUserImg, currentUserId}: Props) => {
             thread: ''
         }
     });
-    
+    const [loading, setLoading] = useState(false);
     const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
-        await addCommentToThread(threadId, values.thread, JSON.parse(currentUserId), pathname);
-        form.reset();
+        setLoading(true);
+        await addCommentToThread(threadId, values.thread, JSON.parse(currentUserId), pathname).finally(() => setLoading(false));
+        form.reset(); 
         // router.push('/');
     }
 
@@ -58,7 +58,10 @@ const Comment = ({threadId, currentUserImg, currentUserId}: Props) => {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className='comment-form_btn text-small-regular'>Reply</Button>
+                <Button type="submit" className='comment-form_btn text-small-regular' disabled={loading}>
+                    <Spinner className={loading ? 'block' : 'hidden'} />
+                    Reply
+                </Button>
             </form>
         </Form>
     );

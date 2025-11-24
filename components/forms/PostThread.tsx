@@ -1,9 +1,11 @@
 "use client"
 
 import * as z from 'zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Form,
   FormControl,
@@ -18,7 +20,6 @@ import { usePathname, useRouter } from 'next/navigation';
 // import { updateUser } from '@/lib/actions/user.actions';
 import { ThreadValidation } from '@/lib/validations/thread';
 import { createThread } from '@/lib/actions/thread.actions';
-
 interface Props {
     userId: string
 }
@@ -36,14 +37,15 @@ function PostThread({ userId }: Props) {
             accountId: userId
         }
     });
-
+    const [loading, setLoading] = useState(false);
     const onSubmit = async (values: z.infer<typeof ThreadValidation>) => {
+        setLoading(true);
         await createThread({
             text: values.thread,
             author: userId,
             communityId: organization ? organization.id : null,
             path: pathname
-        });
+        }).finally(() => setLoading(false));
         router.push('/');
     }
     
@@ -63,7 +65,10 @@ function PostThread({ userId }: Props) {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className='bg-primary-500 hover:bg-gray-1 cursor-pointer'>Post Thread</Button>
+                <Button type="submit" className='bg-primary-500 hover:bg-gray-1 cursor-pointer' disabled={loading}>
+                    <Spinner className={loading ? 'block' : 'hidden'} />
+                    Post Thread
+                </Button>
             </form>
         </Form>
     );
